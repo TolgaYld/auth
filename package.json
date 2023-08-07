@@ -1,7 +1,8 @@
 {
-  "name": "nownow-auth-service",
+  "name": "auth-service",
   "version": "1.0.0",
   "main": "index.js",
+  "repository": "git@github.com:TolgaYld/auth.git",
   "scripts": {
     "start": "NODE_ENV=production node ./index.js",
     "dev": "NODE_ENV=test nodemon ./index.js",

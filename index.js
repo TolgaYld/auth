@@ -1,6 +1,6 @@
 const fastify = require("./src/app");
 const { log } = require("./src/modules/logModule");
-const port = parseInt(process.env.PORT) || 8012;
+const port = parseInt(process.env.PORT) || 8001;
 
 // Run the server!
 fastify.listen({ port, host: "0.0.0.0" }, function (err, address) {
