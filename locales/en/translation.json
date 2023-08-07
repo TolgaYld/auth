@@ -1,0 +1,11 @@
+{
+    "user-not-created": "User could not created",
+    "users-not-found": "Users not found",
+    "user-not-found": "User not found",
+    "user-update-failed": "Update failed",
+    "user-password-update-failed": "Update password failed",
+    "email-in-use": "E-Mail is already in use",
+    "authentication-failed": "Wrong e-mail or password",
+    "user-is-banned": "User has been banned. Write an email for more information",
+    "user-delete-failed": "Couldn't delete user"
+}

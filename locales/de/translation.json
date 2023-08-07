@@ -1,0 +1,11 @@
+{
+    "user-not-created": "Benutzer konnte nicht erstellt werden",
+    "users-not-found": "Benutzer wurden nicht gefunden",
+    "user-not-found": "Benutzer wurde nicht gefunden",
+    "user-update-failed": "Update fehlgeschlagen",
+    "user-password-update-failed": "Passwort update fehlgeschlagen",
+    "email-in-use": "E-Mail ist schon vergeben",
+    "authentication-failed": "E-Mail oder Passwort ist falsch",
+    "user-is-banned": "User wurde gebannt. Schreibe eine E-Mail für weitere Informationen",
+    "user-delete-failed": "User konnte nicht gelöscht werden"
+}
