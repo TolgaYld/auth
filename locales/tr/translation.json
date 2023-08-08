@@ -7,5 +7,8 @@
     "email-in-use": "E-Posta adresi kullanılmaktadır",
     "authentication-failed": "E-Posta adresi yada parola yanlış",
     "user-is-banned": "Hesabınız erişime engellendi. Daha fazla bilgi için bir e-posta yazın",
-    "user-delete-failed": "Kullanıcı silinemedi"
+    "user-delete-failed": "Kullanıcı silinemedi",
+    "not-valid-email": "Geçerli bir e-posta adresi değil",
+    "pw-at-least-characters": "Dein Passwort muss aus mindestens 9 Zeichen bestehen",
+    "pw-not-match": "Parolalar uyuşmuyor"
 }

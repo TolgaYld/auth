@@ -3,9 +3,9 @@ const winstonlog = require("../errors/logger");
 const { log } = require("../modules/logModule");
 require("dotenv").config();
 
-const adminQ = "auth";
+const queue = process.env.QUEUE;
 
-let adminChannel = null;
+let channel = null;
 
 let amqpUrl;
 
@@ -21,9 +21,9 @@ try {
     conn.createChannel(async (e, ch) => {
       if (err) winstonlog.error("amqpt error: " + e);
 
-      ch.assertQueue(adminQ, { durable: true });
+      ch.assertQueue(queue, { durable: true });
 
-      adminChannel = ch;
+      channel = ch;
     });
   });
 } catch (error) {
@@ -31,14 +31,14 @@ try {
 }
 
 const pushToMessageQ = (msg) => {
-  if (!adminChannel) {
+  if (!channel) {
     setTimeout(() => {
       pushToMessageQ(msg);
     }, 999);
   }
   try {
-    adminChannel.sendToQueue(adminQ, Buffer.from(JSON.stringify(msg)));
-    log("push to queue: " + adminQ);
+    channel.sendToQueue(queue, Buffer.from(JSON.stringify(msg)));
+    log("push to queue: " + queue);
   } catch (error) {
     winstonlog.error("amqpt error: " + error);
   }

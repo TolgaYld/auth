@@ -7,5 +7,8 @@
     "email-in-use": "E-Mail ist schon vergeben",
     "authentication-failed": "E-Mail oder Passwort ist falsch",
     "user-is-banned": "User wurde gebannt. Schreibe eine E-Mail für weitere Informationen",
-    "user-delete-failed": "User konnte nicht gelöscht werden"
+    "user-delete-failed": "User konnte nicht gelöscht werden",
+    "not-valid-email": "Keine gültige E-Mail-Adresse",
+    "pw-at-least-characters": "Dein Passwort muss aus mindestens 9 Zeichen bestehen",
+    "pw-not-match": "Passwörter stimmen nicht überein"
 }

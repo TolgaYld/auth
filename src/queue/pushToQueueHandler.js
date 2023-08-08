@@ -1,7 +1,7 @@
 const queue = require("./connect");
 
-const push = (crud, payload) => {
-  queue.pushToMessageQ({ action: crud, payload });
+const push = (service, crud, payload) => {
+  queue.pushToMessageQ({ service, action: crud, payload });
 };
 
 module.exports = push;
