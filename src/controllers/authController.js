@@ -30,12 +30,12 @@ const findAll = async (request, reply) => {
     if (id == null) {
       return await errorHandler(401, "unauthorized", true, request, reply);
     } else {
-      const findUser = await User.findById(id);
+      const findUser = await User.findById(id).exec();
 
       if (!findUser) {
         return await errorHandler(401, "unauthorized", true, request, reply);
       } else {
-        const findAllUsers = await User.find();
+        const findAllUsers = await User.find().exec();
         if (!findAllUsers) {
           return await errorHandler(
             404,
@@ -63,12 +63,12 @@ const findOne = async (request, reply) => {
     if (userId == null) {
       return await errorHandler(401, "unauthorized", true, request, reply);
     } else {
-      const findUser = await User.findById(userId);
+      const findUser = await User.findById(userId).exec();
       if (!findUser) {
         return await errorHandler(401, "unauthorized", true, request, reply);
       } else {
         const { id } = request.params;
-        const findOneUser = await User.findById(id);
+        const findOneUser = await User.findById(id).exec();
 
         if (!findOneUser) {
           return await errorHandler(
@@ -116,7 +116,9 @@ const createUser = async (request, reply) => {
       return await errorHandler(406, "pw-not-match", true, request, reply);
     } else {
       try {
-        const findUser = await User.findOne({ email: request.body.data.email });
+        const findUser = await User.findOne({
+          email: request.body.data.email,
+        }).exec();
 
         if (findUser) {
           return await errorHandler(406, "email-in-use", true, request, reply);
@@ -162,7 +164,9 @@ const signInUser = async (request, reply) => {
     return await errorHandler(406, "not-valid-email", true, request, reply);
   } else {
     try {
-      const findUser = await User.findOne({ email: request.body.data.email });
+      const findUser = await User.findOne({
+        email: request.body.data.email,
+      }).exec();
 
       if (!findUser) {
         return await errorHandler(
@@ -239,12 +243,12 @@ const updateUser = async (request, reply) => {
     if (userId == null) {
       return await errorHandler(401, "unauthorized", true, request, reply);
     } else {
-      const findRequesterId = await User.findById(userId);
+      const findRequesterId = await User.findById(userId).exec();
       if (!findRequesterId) {
         return await errorHandler(401, "unauthorized", true, request, reply);
       } else {
         const { id } = request.params;
-        const findUser = await User.findById(id);
+        const findUser = await User.findById(id).exec();
 
         if (!findUser) {
           return await errorHandler(
@@ -301,7 +305,7 @@ const updateUserPassword = async (request, reply) => {
     if (userId == null) {
       return await errorHandler(401, "unauthorized", true, request, reply);
     } else {
-      const findRequesterId = await User.findById(userId);
+      const findRequesterId = await User.findById(userId).exec();
       if (!findRequesterId) {
         return await errorHandler(401, "unauthorized", true, request, reply);
       } else {
@@ -384,12 +388,12 @@ const deleteUser = async (request, reply) => {
     if (userId == null) {
       return await errorHandler(401, "unauthorized", true, request, reply);
     } else {
-      const findRequesterId = await User.findById(userId);
+      const findRequesterId = await User.findById(userId).exec();
       if (!findRequesterId) {
         return await errorHandler(401, "unauthorized", true, request, reply);
       } else {
         const { id } = request.params;
-        const findUser = await User.findById(id);
+        const findUser = await User.findById(id).exec();
 
         if (!findUser) {
           return await errorHandler(
