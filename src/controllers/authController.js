@@ -271,25 +271,26 @@ const updateUser = async (request, reply) => {
               request,
               reply,
             );
-          }
-          if (request.body.data.is_deleted) {
-            pushToQ(["all"], "delete", updatedUser);
-            await reply.code(200).send({
-              success: true,
-              data: updatedUser,
-            });
           } else {
-            await reply.code(200).send({
-              success: true,
-              data: {
-                user: updatedUser,
-                token: token.generate(updatedUser, tokenDuration),
-                refreshToken: refreshToken.generate(
-                  updatedUser,
-                  refreshTokenDuration,
-                ),
-              },
-            });
+            if (request.body.data.is_deleted) {
+              pushToQ(["all"], "delete", updatedUser);
+              await reply.code(200).send({
+                success: true,
+                data: updatedUser,
+              });
+            } else {
+              await reply.code(200).send({
+                success: true,
+                data: {
+                  user: updatedUser,
+                  token: token.generate(updatedUser, tokenDuration),
+                  refreshToken: refreshToken.generate(
+                    updatedUser,
+                    refreshTokenDuration,
+                  ),
+                },
+              });
+            }
           }
         }
       }
