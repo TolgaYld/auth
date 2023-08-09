@@ -275,7 +275,6 @@ const updateUser = async (request, reply) => {
               data: updatedUser,
             });
           } else {
-            pushToQ(["all"], "update", updatedUser);
             await reply.code(200).send({
               success: true,
               data: {
