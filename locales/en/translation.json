@@ -10,5 +10,6 @@
     "user-delete-failed": "Couldn't delete user",
     "not-valid-email": "Not a valid e-mail",
     "pw-at-least-characters": "Your password must consist of at least 9 characters",
-    "pw-not-match": "Passwords do not match"
+    "pw-not-match": "Passwords do not match",
+    "unauthorized": "Unauthorized access"
 }

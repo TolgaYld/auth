@@ -26,15 +26,32 @@ const validatePasswordOptions = {
 
 const findAll = async (request, reply) => {
   try {
-    const findAllUsers = await User.find();
-    if (!findAllUsers) {
-      return await errorHandler(404, "users-not-found", true, request, reply);
-    }
+    const id = request.headers.authorization;
+    if (id == null) {
+      return await errorHandler(401, "unauthorized", true, request, reply);
+    } else {
+      const findUser = await User.findById(id);
 
-    await reply.code(200).send({
-      success: true,
-      data: findAllUsers,
-    });
+      if (!findUser) {
+        return await errorHandler(401, "unauthorized", true, request, reply);
+      } else {
+        const findAllUsers = await User.find();
+        if (!findAllUsers) {
+          return await errorHandler(
+            404,
+            "users-not-found",
+            true,
+            request,
+            reply,
+          );
+        }
+
+        await reply.code(200).send({
+          success: true,
+          data: findAllUsers,
+        });
+      }
+    }
   } catch (error) {
     return await errorHandler(404, error, false, request, reply);
   }
@@ -42,16 +59,32 @@ const findAll = async (request, reply) => {
 
 const findOne = async (request, reply) => {
   try {
-    const { id } = request.params;
-    const findOneUser = await User.findById(id);
+    const userId = request.headers.authorization;
+    if (userId == null) {
+      return await errorHandler(401, "unauthorized", true, request, reply);
+    } else {
+      const findUser = await User.findById(userId);
+      if (!findUser) {
+        return await errorHandler(401, "unauthorized", true, request, reply);
+      } else {
+        const { id } = request.params;
+        const findOneUser = await User.findById(id);
 
-    if (!findOneUser) {
-      return await errorHandler(404, "user-not-found", true, request, reply);
+        if (!findOneUser) {
+          return await errorHandler(
+            404,
+            "user-not-found",
+            true,
+            request,
+            reply,
+          );
+        }
+        await reply.code(200).send({
+          success: true,
+          data: findOneUser,
+        });
+      }
     }
-    await reply.code(200).send({
-      success: true,
-      data: findOneUser,
-    });
   } catch (error) {
     return await errorHandler(404, error, false, request, reply);
   }
@@ -202,68 +235,13 @@ const signInUser = async (request, reply) => {
 
 const updateUser = async (request, reply) => {
   try {
-    const { id } = request.params;
-    const findUser = await User.findById(id);
-
-    if (!findUser) {
-      return await errorHandler(404, "user-not-found", true, request, reply);
+    const userId = request.headers.authorization;
+    if (userId == null) {
+      return await errorHandler(401, "unauthorized", true, request, reply);
     } else {
-      const updatedUser = await findUser.update({
-        ...request.body.data,
-      });
-
-      if (!updatedUser) {
-        return await errorHandler(
-          400,
-          "user-update-failed",
-          true,
-          request,
-          reply,
-        );
-      }
-      if (request.body.data.is_deleted) {
-        pushToQ(["all"], "delete", updatedUser);
-        await reply.code(200).send({
-          success: true,
-          data: updatedUser,
-        });
-      } else {
-        pushToQ(["all"], "update", updatedUser);
-        await reply.code(200).send({
-          success: true,
-          data: {
-            user: updatedUser,
-            token: token.generate(updatedUser, tokenDuration),
-            refreshToken: refreshToken.generate(
-              updatedUser,
-              refreshTokenDuration,
-            ),
-          },
-        });
-      }
-    }
-  } catch (error) {
-    return await errorHandler(404, error, false, request, reply);
-  }
-};
-
-const updateUserPassword = async (request, reply) => {
-  try {
-    const isStrongPassword = validator.isStrongPassword(
-      request.body.data.password,
-      validatePasswordOptions,
-    );
-    if (!isStrongPassword) {
-      return await errorHandler(
-        406,
-        "pw-at-least-character",
-        true,
-        request,
-        reply,
-      );
-    } else {
-      if (request.body.data.password !== request.body.data.repeat_password) {
-        return await errorHandler(406, "pw-not-match", true, request, reply);
+      const findRequesterId = await User.findById(userId);
+      if (!findRequesterId) {
+        return await errorHandler(401, "unauthorized", true, request, reply);
       } else {
         const { id } = request.params;
         const findUser = await User.findById(id);
@@ -278,29 +256,121 @@ const updateUserPassword = async (request, reply) => {
           );
         } else {
           const updatedUser = await findUser.update({
-            password: await bcrypt.hash(request.body.data.password, saltValue),
+            ...request.body.data,
           });
 
           if (!updatedUser) {
             return await errorHandler(
               400,
-              "user-password-update-failed",
+              "user-update-failed",
               true,
               request,
               reply,
             );
           }
-          await reply.code(200).send({
-            success: true,
-            data: {
-              user: updatedUser,
-              token: token.generate(updatedUser, tokenDuration),
-              refreshToken: refreshToken.generate(
-                updatedUser,
-                refreshTokenDuration,
-              ),
-            },
-          });
+          if (request.body.data.is_deleted) {
+            pushToQ(["all"], "delete", updatedUser);
+            await reply.code(200).send({
+              success: true,
+              data: updatedUser,
+            });
+          } else {
+            pushToQ(["all"], "update", updatedUser);
+            await reply.code(200).send({
+              success: true,
+              data: {
+                user: updatedUser,
+                token: token.generate(updatedUser, tokenDuration),
+                refreshToken: refreshToken.generate(
+                  updatedUser,
+                  refreshTokenDuration,
+                ),
+              },
+            });
+          }
+        }
+      }
+    }
+  } catch (error) {
+    return await errorHandler(404, error, false, request, reply);
+  }
+};
+
+const updateUserPassword = async (request, reply) => {
+  try {
+    const userId = request.headers.authorization;
+    if (userId == null) {
+      return await errorHandler(401, "unauthorized", true, request, reply);
+    } else {
+      const findRequesterId = await User.findById(userId);
+      if (!findRequesterId) {
+        return await errorHandler(401, "unauthorized", true, request, reply);
+      } else {
+        const isStrongPassword = validator.isStrongPassword(
+          request.body.data.password,
+          validatePasswordOptions,
+        );
+        if (!isStrongPassword) {
+          return await errorHandler(
+            406,
+            "pw-at-least-character",
+            true,
+            request,
+            reply,
+          );
+        } else {
+          if (
+            request.body.data.password !== request.body.data.repeat_password
+          ) {
+            return await errorHandler(
+              406,
+              "pw-not-match",
+              true,
+              request,
+              reply,
+            );
+          } else {
+            const { id } = request.params;
+            const findUser = await User.findById(id);
+
+            if (!findUser) {
+              return await errorHandler(
+                404,
+                "user-not-found",
+                true,
+                request,
+                reply,
+              );
+            } else {
+              const updatedUser = await findUser.update({
+                password: await bcrypt.hash(
+                  request.body.data.password,
+                  saltValue,
+                ),
+              });
+
+              if (!updatedUser) {
+                return await errorHandler(
+                  400,
+                  "user-password-update-failed",
+                  true,
+                  request,
+                  reply,
+                );
+              }
+              await reply.code(200).send({
+                success: true,
+                data: {
+                  user: updatedUser,
+                  token: token.generate(updatedUser, tokenDuration),
+                  refreshToken: refreshToken.generate(
+                    updatedUser,
+                    refreshTokenDuration,
+                  ),
+                },
+              });
+            }
+          }
         }
       }
     }
@@ -311,28 +381,44 @@ const updateUserPassword = async (request, reply) => {
 
 const deleteUser = async (request, reply) => {
   try {
-    const { id } = request.params;
-    const findUser = await User.findById(id);
-
-    if (!findUser) {
-      return await errorHandler(404, "user-not-found", true, request, reply);
+    const userId = request.headers.authorization;
+    if (userId == null) {
+      return await errorHandler(401, "unauthorized", true, request, reply);
     } else {
-      const deletedUser = await findUser.deleteOne();
+      const findRequesterId = await User.findById(userId);
+      if (!findRequesterId) {
+        return await errorHandler(401, "unauthorized", true, request, reply);
+      } else {
+        const { id } = request.params;
+        const findUser = await User.findById(id);
 
-      if (!deletedUser) {
-        return await errorHandler(
-          400,
-          "user-delete-failed",
-          true,
-          request,
-          reply,
-        );
+        if (!findUser) {
+          return await errorHandler(
+            404,
+            "user-not-found",
+            true,
+            request,
+            reply,
+          );
+        } else {
+          const deletedUser = await findUser.deleteOne();
+
+          if (!deletedUser) {
+            return await errorHandler(
+              400,
+              "user-delete-failed",
+              true,
+              request,
+              reply,
+            );
+          }
+          pushToQ(["all"], "delete", findUser);
+          await reply.code(200).send({
+            success: true,
+            data: findUser,
+          });
+        }
       }
-      pushToQ(["all"], "delete", findUser);
-      await reply.code(200).send({
-        success: true,
-        data: findUser,
-      });
     }
   } catch (error) {
     return await errorHandler(404, error, false, request, reply);
