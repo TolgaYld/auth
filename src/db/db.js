@@ -5,6 +5,7 @@ if (process.env.NODE_ENV === "development") {
     connectionString: process.env.MONGODBDEVELOPMENT,
     ENV: "DEVELOPMENT_ENV",
   };
+  console.log(process.env.MONGODBDEVELOPMENT);
   db = process.env.MONGODBDEVELOPMENT;
 } else if (process.env.NODE_ENV === "production") {
   db = {

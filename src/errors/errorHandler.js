@@ -1,4 +1,5 @@
 const log = require("./logger");
+const i18next = require("i18next");
 const errorHandler = async (
   statusCode,
   errorMessage,
@@ -7,13 +8,13 @@ const errorHandler = async (
   reply,
 ) => {
   if (loadi18next) {
-    log.error(
-      `Status Code: ${statusCode} / Error Message: ${await request.i18n
-        .changeLanguage("en")
-        .then((t) => {
-          t(errorMessage);
-        })}`,
-    );
+    i18next.changeLanguage("en", (err, t) => {
+      if (err) return console.log("something went wrong loading", err);
+
+      const loadVariable = t(errorMessage); // -> same as i18next.t
+      log.error(`Status Code: ${statusCode} / Error Message: ${loadVariable}`);
+    });
+
     return await reply
       .code(statusCode)
       .send({ msg: await request.t(errorMessage), success: false });

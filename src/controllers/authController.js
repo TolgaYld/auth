@@ -1,10 +1,9 @@
 const User = require("../models/userModel");
 const errorHandler = require("../errors/errorHandler");
-const pushToQ = require("../queue/pushToQueueHandler");
+// const pushToQ = require("../queue/pushToQueueHandler");
 const { token, refreshToken } = require("../helpers/token");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
-const { log } = require("../modules/logModule");
 
 const saltValue = 12;
 const tokenDuration = "3h";
@@ -27,6 +26,7 @@ const validatePasswordOptions = {
 const findAll = async (request, reply) => {
   try {
     const id = request.headers.authorization;
+
     if (id == null) {
       return await errorHandler(401, "unauthorized", true, request, reply);
     } else {
@@ -60,6 +60,7 @@ const findAll = async (request, reply) => {
 const findOne = async (request, reply) => {
   try {
     const userId = request.headers.authorization;
+
     if (userId == null) {
       return await errorHandler(401, "unauthorized", true, request, reply);
     } else {
@@ -138,7 +139,7 @@ const createUser = async (request, reply) => {
               reply,
             );
           }
-          pushToQ(["all"], "create", createdUser);
+          // pushToQ(["all"], "create", createdUser);
           await reply.code(201).send({
             success: true,
             data: {
@@ -200,10 +201,14 @@ const signInUser = async (request, reply) => {
             );
           } else {
             if (findUser.is_deleted) {
-              const updateUser = await findUser.update({
-                is_deleted: false,
-              });
-              pushToQ(["all"], "create", updateUser);
+              const updateUser = await User.findByIdAndUpdate(
+                findUser._id,
+                {
+                  is_deleted: false,
+                },
+                { new: true },
+              );
+              // pushToQ(["all"], "create", updateUser);
               await reply.code(200).send({
                 success: true,
                 data: {
@@ -240,6 +245,7 @@ const signInUser = async (request, reply) => {
 const updateUser = async (request, reply) => {
   try {
     const userId = request.headers.authorization;
+
     if (userId == null) {
       return await errorHandler(401, "unauthorized", true, request, reply);
     } else {
@@ -259,9 +265,13 @@ const updateUser = async (request, reply) => {
             reply,
           );
         } else {
-          const updatedUser = await findUser.update({
-            ...request.body.data,
-          });
+          const updatedUser = await User.findByIdAndUpdate(
+            id,
+            {
+              ...request.body.data,
+            },
+            { new: true },
+          );
 
           if (!updatedUser) {
             return await errorHandler(
@@ -273,7 +283,7 @@ const updateUser = async (request, reply) => {
             );
           } else {
             if (request.body.data.is_deleted) {
-              pushToQ(["all"], "delete", updatedUser);
+              // pushToQ(["all"], "delete", updatedUser);
               await reply.code(200).send({
                 success: true,
                 data: updatedUser,
@@ -346,12 +356,16 @@ const updateUserPassword = async (request, reply) => {
                 reply,
               );
             } else {
-              const updatedUser = await findUser.update({
-                password: await bcrypt.hash(
-                  request.body.data.password,
-                  saltValue,
-                ),
-              });
+              const updatedUser = await User.findByIdAndUpdate(
+                findUser._id,
+                {
+                  password: await bcrypt.hash(
+                    request.body.data.password,
+                    saltValue,
+                  ),
+                },
+                { new: true },
+              );
 
               if (!updatedUser) {
                 return await errorHandler(
@@ -386,6 +400,7 @@ const updateUserPassword = async (request, reply) => {
 const deleteUser = async (request, reply) => {
   try {
     const userId = request.headers.authorization;
+
     if (userId == null) {
       return await errorHandler(401, "unauthorized", true, request, reply);
     } else {
@@ -405,7 +420,7 @@ const deleteUser = async (request, reply) => {
             reply,
           );
         } else {
-          const deletedUser = await findUser.deleteOne();
+          const deletedUser = await User.findByIdAndDelete(id);
 
           if (!deletedUser) {
             return await errorHandler(
@@ -416,7 +431,7 @@ const deleteUser = async (request, reply) => {
               reply,
             );
           }
-          pushToQ(["all"], "delete", findUser);
+          // pushToQ(["all"], "delete", findUser);
           await reply.code(200).send({
             success: true,
             data: findUser,

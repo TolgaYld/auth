@@ -35,16 +35,14 @@ describe("auth", () => {
   let sampleArgs;
   let findStub;
 
-  context("GET /api/v1.0/findAll", function () {
+  context("GET with no token /api/v1.0/findAll", function () {
     this.timeout(9000);
     it("Get all users", (done) => {
       request(fastify.server)
         .get("/api/v1.0/findAll")
         .end((err, response) => {
-          expect(response.status).to.equal(200);
-          expect(response.body.success).to.be.true;
-          expect(response.body.data).to.be.an("array");
-          expect(response.body.data).to.have.lengthOf(0);
+          expect(response.status).to.equal(401);
+          expect(response.body.success).to.be.false;
           done(err);
         });
     });
