@@ -43,7 +43,7 @@ const UserSchema = new Schema(
       default: false,
       required: true,
     },
-    last_update_from_user_id: {
+    last_update_from_user: {
       type: SchemaTypes.ObjectId,
     },
   },
