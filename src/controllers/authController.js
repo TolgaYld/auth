@@ -44,12 +44,12 @@ const findAll = async (request, reply) => {
             request,
             reply,
           );
+        } else {
+          await reply.code(200).send({
+            success: true,
+            data: findAllUsers,
+          });
         }
-
-        await reply.code(200).send({
-          success: true,
-          data: findAllUsers,
-        });
       }
     }
   } catch (error) {
@@ -79,11 +79,12 @@ const findOne = async (request, reply) => {
             request,
             reply,
           );
+        } else {
+          await reply.code(200).send({
+            success: true,
+            data: findOneUser,
+          });
         }
-        await reply.code(200).send({
-          success: true,
-          data: findOneUser,
-        });
       }
     }
   } catch (error) {
@@ -138,19 +139,20 @@ const createUser = async (request, reply) => {
               request,
               reply,
             );
+          } else {
+            // pushToQ(["all"], "create", createdUser);
+            await reply.code(201).send({
+              success: true,
+              data: {
+                user: createdUser,
+                token: token.generate(createdUser, tokenDuration),
+                refreshToken: refreshToken.generate(
+                  createdUser,
+                  refreshTokenDuration,
+                ),
+              },
+            });
           }
-          // pushToQ(["all"], "create", createdUser);
-          await reply.code(201).send({
-            success: true,
-            data: {
-              user: createdUser,
-              token: token.generate(createdUser, tokenDuration),
-              refreshToken: refreshToken.generate(
-                createdUser,
-                refreshTokenDuration,
-              ),
-            },
-          });
         }
       } catch (error) {
         return await errorHandler(400, error, false, request, reply);
@@ -201,25 +203,35 @@ const signInUser = async (request, reply) => {
             );
           } else {
             if (findUser.is_deleted) {
-              const updateUser = await User.findByIdAndUpdate(
+              const updatedUser = await User.findByIdAndUpdate(
                 findUser._id,
                 {
                   is_deleted: false,
                 },
                 { new: true },
               );
-              // pushToQ(["all"], "create", updateUser);
-              await reply.code(200).send({
-                success: true,
-                data: {
-                  user: updateUser,
-                  token: token.generate(updateUser, tokenDuration),
-                  refreshToken: refreshToken.generate(
-                    updateUser,
-                    refreshTokenDuration,
-                  ),
-                },
-              });
+              if (!updatedUser) {
+                return await errorHandler(
+                  400,
+                  "user-update-failed",
+                  true,
+                  request,
+                  reply,
+                );
+              } else {
+                // pushToQ(["all"], "create", updateUser);
+                await reply.code(200).send({
+                  success: true,
+                  data: {
+                    user: updatedUser,
+                    token: token.generate(updatedUser, tokenDuration),
+                    refreshToken: refreshToken.generate(
+                      updatedUser,
+                      refreshTokenDuration,
+                    ),
+                  },
+                });
+              }
             } else {
               await reply.code(200).send({
                 success: true,
@@ -375,18 +387,19 @@ const updateUserPassword = async (request, reply) => {
                   request,
                   reply,
                 );
+              } else {
+                await reply.code(200).send({
+                  success: true,
+                  data: {
+                    user: updatedUser,
+                    token: token.generate(updatedUser, tokenDuration),
+                    refreshToken: refreshToken.generate(
+                      updatedUser,
+                      refreshTokenDuration,
+                    ),
+                  },
+                });
               }
-              await reply.code(200).send({
-                success: true,
-                data: {
-                  user: updatedUser,
-                  token: token.generate(updatedUser, tokenDuration),
-                  refreshToken: refreshToken.generate(
-                    updatedUser,
-                    refreshTokenDuration,
-                  ),
-                },
-              });
             }
           }
         }
@@ -430,12 +443,13 @@ const deleteUser = async (request, reply) => {
               request,
               reply,
             );
+          } else {
+            // pushToQ(["all"], "delete", findUser);
+            await reply.code(200).send({
+              success: true,
+              data: findUser,
+            });
           }
-          // pushToQ(["all"], "delete", findUser);
-          await reply.code(200).send({
-            success: true,
-            data: findUser,
-          });
         }
       }
     }
